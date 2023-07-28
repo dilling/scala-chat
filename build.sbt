@@ -14,5 +14,5 @@ lazy val root = project
     libraryDependencies += "com.softwaremill.sttp.client3" %% "zio" % "3.8.16",
     libraryDependencies += "dev.zio" %% "zio-interop-cats" % "22.0.0.0",
     libraryDependencies += "dev.zio" %% "zio-config" % "3.0.7",
-    libraryDependencies += "dev.zio" %% "zio-http" % "3.0.0-RC2"
+    libraryDependencies += "dev.zio" %% "zio-http" % "3.0.0-RC2",
   )
