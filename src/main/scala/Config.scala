@@ -1,6 +1,5 @@
 import zio.config.ConfigSource
 import zio.config._, ConfigDescriptor._, ConfigSource._
-import zio.config.magnolia.descriptor
 
 case class Config(apiKey: String)
 

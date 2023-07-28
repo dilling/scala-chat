@@ -6,13 +6,15 @@ import sttp.client3.httpclient.zio.HttpClientZioBackend
 import zio.interop.catz._
 import dev.maxmelnyk.openaiscala.models.text.completions.chat.ChatCompletion.Message
 import dev.maxmelnyk.openaiscala.models.text.completions.chat.ChatCompletion.Message.Role
+import zio.http._
+import zio.Scope
 
 object App extends ZIOAppDefault:
   def run = program
 
   val openAIClient = for {
     config <- Config.get
-    backend <- HttpClientZioBackend.scoped()
+    backend <- HttpClientZioBackend()
   } yield OpenAIClient(config.apiKey, None)(backend)
 
   val messages = Seq(
@@ -22,10 +24,21 @@ object App extends ZIOAppDefault:
     )
   )
 
-  val program =
+  val sendMessages =
     for {
       client <- openAIClient
       response <- client.createChatCompletion(messages)
-      message <- ZIO.fromOption(response.choices.headOption.map(_.message.content))
-      _ <- printLine(message)
-    } yield ()
+      message <- ZIO.fromEither(response.choices.headOption.map(_.message.content).toRight(new Exception("No Messages")))
+    } yield message
+
+  val app: HttpApp[Any, Throwable] =
+    Http.collectZIO[Request] {
+      case Method.POST -> Root / "chat" => sendMessages.map(Response.text(_))
+    }
+
+  val server = app.catchAllZIO {
+    case e: Throwable => ZIO.succeed(Response.fromHttpError(HttpError.InternalServerError(e.getMessage)))
+  }
+
+  val program = Server.serve(server).provide(Server.default)
+
