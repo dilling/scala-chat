@@ -6,7 +6,7 @@ import sttp.client3._
 import sttp.client3.httpclient.zio.HttpClientZioBackend
 import sttp.client3.SttpBackend
 
-object Cli extends ZIOAppDefault:
+object Cli extends ZIOAppDefault {
   def run = program.provide(
     SttpClient.layer,
     HttpClientZioBackend.layer(),
@@ -26,13 +26,15 @@ object Cli extends ZIOAppDefault:
   } yield ()
 
   val program = sendMessage.forever
+}
 
 trait Client {
     def chatRequest(message: String): Task[Response[Either[String, String]]]
 }
 
-object Client:
+object Client {
     def chatRequest(message: String) = ZIO.serviceWithZIO[Client](_.chatRequest(message))
+}
 
 case class SttpClient(sttpBackend: SttpBackend[Task, Any]) extends Client {
     def chatRequest(message: String) = basicRequest
@@ -41,5 +43,6 @@ case class SttpClient(sttpBackend: SttpBackend[Task, Any]) extends Client {
         .send(sttpBackend)
 }
 
-object SttpClient:
+object SttpClient {
     val layer: ZLayer[SttpBackend[Task, Any], Any, Client] = ZLayer.fromFunction(SttpClient(_))
+}

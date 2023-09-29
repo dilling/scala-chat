@@ -9,7 +9,7 @@ import dev.maxmelnyk.openaiscala.models.text.completions.chat.ChatCompletion.Mes
 import zio.http._
 import zio.Scope
 
-object App extends ZIOAppDefault:
+object App extends ZIOAppDefault {
   def run = program
 
   val openAIClient = for {
@@ -41,4 +41,4 @@ object App extends ZIOAppDefault:
   }
 
   val program = Server.serve(server).provide(Server.default)
-
+}
